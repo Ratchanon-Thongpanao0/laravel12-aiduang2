@@ -188,3 +188,9 @@ Route::get('product/form', function () {
 Route::get('barchart', function () {    
     return view('barchart');
 })->name('barchart');
+
+
+use App\Http\Controllers\NewsController;
+
+Route::get('/', [NewsController::class, 'index']);
+Route::get('/news/{news}', [NewsController::class, 'show']); // <= show
