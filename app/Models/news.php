@@ -12,13 +12,14 @@ class News extends Model
         'category',
         'summary',
         'content',
-        'source_url',
         'image_url',
-        'published_at'
+        'source_url',
+        'published_at',
     ];
 
     protected $casts = ['published_at' => 'datetime'];
 
+    // ใช้ slug เป็น key ใน URL
     public function getRouteKeyName(): string
     {
         return 'slug';

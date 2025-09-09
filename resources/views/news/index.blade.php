@@ -1,25 +1,39 @@
-<x-layouts.app :title="'รวมข่าวล่าสุด'">
+<x-layouts.app :title="'รายการข่าว'">
   <div class="grid">
-    @foreach($news as $n)
+    @foreach($news as $item)
       <article class="card">
-        @if($n->image_url)
-          <img class="thumb" src="{{ $n->image_url }}" alt="{{ $n->title }}">
+        @if($item->image_url)
+          <img class="thumb" src="{{ $item->image_url }}" alt="{{ $item->title }}">
         @endif
+
         <div class="body">
-          <a class="title" href="{{ url('/news/'.$n->slug) }}">{{ $n->title }}</a>
+          <div class="title">{{ $item->title }}</div>
           <div class="meta">
-            {{ $n->category }} • {{ optional($n->published_at)->format('d/m/Y H:i') }}
+            {{ $item->category }} • {{ optional($item->published_at)->format('d/m/Y H:i') }}
           </div>
-          @if($n->summary)
-            <p class="summary">{{ \Illuminate\Support\Str::limit($n->summary, 180) }}</p>
-          @endif
-          <a class="btn" href="{{ url('/news/'.$n->slug) }}">อ่านต่อ →</a>
+          <p class="summary">{{ \Illuminate\Support\Str::limit($item->summary, 180) }}</p>
+
+          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:8px">
+            <!-- อ่านต่อ -->
+            <a class="btn" href="{{ route('news.show', ['news' => $item->id]) }}">อ่านต่อ →</a>
+
+            <!-- แก้ไข -->
+            <a class="btn" href="{{ route('news.edit', ['news' => $item->id]) }}">แก้ไข</a>
+
+            <!-- ลบ -->
+            <form action="{{ route('news.destroy', ['news' => $item->id]) }}"
+                  method="POST" onsubmit="return confirm('ลบข่าวนี้?')">
+              @csrf
+              @method('DELETE')
+              <button class="btn" type="submit">ลบ</button>
+            </form>
+          </div>
         </div>
       </article>
     @endforeach
   </div>
 
-  {{-- ★ ห่อ pagination ด้วย .pagi เพื่อสไตล์และซ่อน “Showing …” --}}
+  <!-- pagination -->
   <div class="pagi">
     {{ $news->onEachSide(1)->links() }}
   </div>

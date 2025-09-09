@@ -164,12 +164,10 @@ Route::get('/category/entertain', [CategoryController::class, "entertain"]);
 Route::get('/category/auto', [CategoryController::class, "auto"]);
 
 
-use App\Http\Controllers\NewsController;
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 
-Route::get('/', [NewsController::class, 'index']);
-Route::get('/news/{news}', [NewsController::class, 'show']); // <= show
 
 Route::get('query/sql', function () {
     $products = DB::select("SELECT * FROM products");
@@ -223,3 +221,21 @@ Route::post('/product-submit', function (Request $request) {
     return redirect()->route('product.index')->with('success', 'เพิ่มสินค้าแล้ว!');
 })->name('product.submit');
 
+
+
+
+
+use App\Http\Controllers\NewsController;
+
+
+// routes/web.php
+
+
+
+Route::get('/', [NewsController::class, 'index'])->name('news.index');
+Route::get('/news/create', [NewsController::class, 'create'])->name('news.create');
+Route::post('/news', [NewsController::class, 'store'])->name('news.store');
+Route::get('/news/{news}/edit', [NewsController::class, 'edit'])->name('news.edit');
+Route::put('/news/{news}', [NewsController::class, 'update'])->name('news.update');
+Route::delete('/news/{news}', [NewsController::class, 'destroy'])->name('news.destroy');
+Route::get('/news/{news}', [NewsController::class, 'show'])->name('news.show');
