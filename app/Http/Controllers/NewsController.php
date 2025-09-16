@@ -2,90 +2,92 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\News;
+use Illuminate\Http\Request;
 
 class NewsController extends Controller
 {
-    /**
-     * แสดงรายการข่าวทั้งหมด
-     */
-    public function index()
+    // GET /news
+    public function index(Request $request)
     {
-        $news = News::latest()->paginate(9); // แสดง 9 ข่าวต่อหน้า
-        return view('news.index', compact('news'));
+        $q = $request->get('q');
+        $cat = $request->get('category');
+
+        $news = News::query()
+            ->when($cat, fn($w) => $w->where('category', $cat))
+            ->when($q, function ($w) use ($q) {
+                $w->where(function ($x) use ($q) {
+                    $x->where('title', 'like', "%$q%")
+                        ->orWhere('subtitle', 'like', "%$q%")
+                        ->orWhere('body', 'like', "%$q%");
+                });
+            })
+            ->latest()
+            ->paginate(9)
+            ->withQueryString();
+
+        $categories = News::query()->select('category')->distinct()->orderBy('category')->pluck('category');
+
+        return view('news.index', compact('news', 'categories', 'q', 'cat'));
     }
 
-    /**
-     * แสดงฟอร์มสร้างข่าวใหม่
-     */
+    // GET /news/create
     public function create()
     {
-        return view('news.create');
+        $categories = News::query()->select('category')->distinct()->orderBy('category')->pluck('category');
+        return view('news.create', compact('categories'));
     }
 
-    /**
-     * บันทึกข่าวใหม่ลง DB
-     */
+    // POST /news
     public function store(Request $request)
     {
         $data = $request->validate([
-            'title' => 'required|string|max:255',
-            'category' => 'required|string|max:255',
-            'summary' => 'nullable|string',
-            'content' => 'nullable|string',
-            'image_url' => 'nullable|string',
+            'title' => ['required', 'string', 'max:255'],
+            'category' => ['required', 'string', 'max:50'],
+            'subtitle' => ['nullable', 'string', 'max:255'],
+            'body' => ['nullable', 'string'],
+            'link' => ['nullable', 'url', 'max:2048'],
+            'image' => ['nullable', 'url', 'max:2048'],
+            'published_at' => ['nullable', 'date'],
         ]);
 
-        $news = News::create($data);
-
-        return redirect()->route('news.show', $news->id)
-                         ->with('success', 'เพิ่มข่าวเรียบร้อยแล้ว');
+        News::create($data);
+        return redirect()->route('news.index')->with('ok', 'บันทึกข่าวแล้ว');
     }
 
-    /**
-     * แสดงข่าวเดียว (หน้าอ่านต่อ)
-     */
-    public function show(News $news)
-    {
-        return view('news.show', compact('news'));
-    }
-
-    /**
-     * แสดงฟอร์มแก้ไขข่าว
-     */
+    // GET /news/{news}/edit
     public function edit(News $news)
     {
-        return view('news.edit', compact('news'));
+        $categories = News::query()->select('category')->distinct()->orderBy('category')->pluck('category');
+        return view('news.edit', compact('news', 'categories'));
     }
 
-    /**
-     * อัปเดตข่าว
-     */
+    // PUT/PATCH /news/{news}
     public function update(Request $request, News $news)
     {
         $data = $request->validate([
-            'title' => 'required|string|max:255',
-            'category' => 'required|string|max:255',
-            'summary' => 'nullable|string',
-            'content' => 'nullable|string',
-            'image_url' => 'nullable|string',
+            'title' => ['required', 'string', 'max:255'],
+            'category' => ['required', 'string', 'max:50'],
+            'subtitle' => ['nullable', 'string', 'max:255'],
+            'body' => ['nullable', 'string'],
+            'link' => ['nullable', 'url', 'max:2048'],
+            'image' => ['nullable', 'url', 'max:2048'],
+            'published_at' => ['nullable', 'date'],
         ]);
 
         $news->update($data);
-
-        return redirect()->route('news.show', $news->id)
-                         ->with('success', 'แก้ไขข่าวเรียบร้อยแล้ว');
+        return redirect()->route('news.index')->with('ok', 'แก้ไขข่าวแล้ว');
     }
 
-    /**
-     * ลบข่าว
-     */
+    // DELETE /news/{news}
     public function destroy(News $news)
     {
         $news->delete();
+        return back()->with('ok', 'ลบข่าวแล้ว');
+    }
 
-        return redirect()->route('news.index')
-                         ->with('success', 'ลบข่าวเรียบร้อยแล้ว');
+    public function show(\App\Models\News $news)
+    {
+        return view('news.show', compact('news'));
     }
 }

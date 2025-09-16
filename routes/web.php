@@ -81,9 +81,10 @@ Route::get("/gallery/cat", function () {
 
 
 // 3
+
 Route::get("/teacher", function () {
     return view("teacher");
-});
+})->middleware('auth','role:admin,teacher,guest');
 
 Route::get("/student", function () {
     return view("student");
@@ -225,17 +226,9 @@ Route::post('/product-submit', function (Request $request) {
 
 
 
+
 use App\Http\Controllers\NewsController;
+// routes ของข่าว
+Route::resource('news', NewsController::class);
 
 
-// routes/web.php
-
-
-
-Route::get('/', [NewsController::class, 'index'])->name('news.index');
-Route::get('/news/create', [NewsController::class, 'create'])->name('news.create');
-Route::post('/news', [NewsController::class, 'store'])->name('news.store');
-Route::get('/news/{news}/edit', [NewsController::class, 'edit'])->name('news.edit');
-Route::put('/news/{news}', [NewsController::class, 'update'])->name('news.update');
-Route::delete('/news/{news}', [NewsController::class, 'destroy'])->name('news.destroy');
-Route::get('/news/{news}', [NewsController::class, 'show'])->name('news.show');

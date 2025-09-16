@@ -47,7 +47,7 @@
 <body>
   <div class="container">
     <header>
-      <h2>เว็บข่าวออนไลน์</h2>
+      <a class="btn" href="{{ route('news.index') }}"><h2>เว็บข่าวออนไลน์</h2></a>
       <div>
         <a class="btn" href="{{ route('news.create') }}">+ เพิ่มข่าว</a>
         <a class="btn" href="{{ route('news.index') }}">หน้าแรก</a>
